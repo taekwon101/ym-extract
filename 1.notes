@@ -1,0 +1,57 @@
+stackoverflow linear region post
+-find linear region with second derivative.  fast and simple method->
+    "convolve the data with a conolution kernel equal to 
+    second derivative of a gaussian.  The adjustable part is the width of the kernel"
+
+pandas productivity tutorial
+-assigning worksheet data to dataframes
+-printing dataframes, columns from dataframes
+-concatinating data from multiple spreadsheets and printing
+-groupby function to select data by column header and .mean for average
+-loc function to select multiple rows of data 
+-plot function (kind='bar') and plt.show function to plot and show data
+-to_excel function with new data
+
+pandas data science tutorial
+-specify tab delimiting (df = pd.read_csv('file.txt', delimieter='\t')
+-read columns by column name print(df.columns) and selecting on some with print(df['Name'][0:5])
+-read rows by row number print(df.iloc[1:4])
+-math data with df.describe()
+sorting with df.sort_values()
+
+
+from matplotlib import pyplot as plt
+import pandas as pd
+import numpy as np
+
+
+# TO-DO: automate finding csvs
+
+# create temporary dataframe for accessing the filename
+df = pd.read_csv('DAQ- Crosshead, … - (Timed).txt', header=2)
+filenamex = df.columns
+# TO-DO: grab cross section data from the test run file name (filenamex) instead of manual input
+crossSection = 10  
+
+# create final dataframe with headers on line 4 (skip second header line to access load and strain arrays)
+df = pd.read_csv('DAQ- Crosshead, … - (Timed).txt', header=[4], delimiter='\t')
+x_strain = df['Strain 1 '][10:]
+x_strain = x_strain.to_numpy()
+y_stress = df['Load '][10:] #/crossSection (figure out math to just write F/A into stress array)
+y_stress = y_stress.to_numpy()
+#pd.DataFrame({y_stress}).to_numpy()
+
+# create convolution kernel for calculating the smoothed second order derivative
+smooth_width = 59
+x1 = np.linspace(-3,3,smooth_width)
+norm = np.sum(np.exp(-x1**2)) * (x1[1]-x1[0]) # ad hoc normalization
+y1 = (4*x1**2 - 2) * np.exp(-x1**2) / smooth_width *8
+
+
+# calculate second order deriv.
+y_fake = np.linspace(-8, 100, 493)
+y_conv = np.convolve(y_stress, y1, mode="same")
+#y_conv = np.convolve(y_fake, y1, mode="same")
+
+plt.plot(x_strain, y_stress)
+plt.show()
